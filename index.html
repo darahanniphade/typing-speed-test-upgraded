@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Typing Speed Test</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      text-align: center;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      width: 600px;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    #text-display {
+      font-size: 18px;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 15px;
+      white-space: pre-wrap;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      font-size: 16px;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      resize: none;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      outline: none;
+    }
+    textarea::placeholder {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    .buttons {
+      margin-top: 15px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: 0.3s;
+    }
+    #start-btn {
+      background: #28a745;
+      color: white;
+    }
+    #start-btn:hover {
+      background: #218838;
+    }
+    #reset-btn {
+      background: #dc3545;
+      color: white;
+      margin-left: 10px;
+    }
+    #reset-btn:hover {
+      background: #c82333;
+    }
+    #result {
+      margin-top: 15px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    #final-result {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Typing Speed Test</h1>
+  <div id="text-display">Click "Start Test" to begin...</div>
+  <textarea id="text-input" placeholder="Start typing here..." disabled></textarea>
+  <div class="buttons">
+    <button id="start-btn" onclick="startTest()">Start Test</button>
+    <button id="reset-btn" onclick="resetTest()">Reset</button>
+  </div>
+  <p id="result"></p>
+  <div id="final-result"></div>
+</div>
+
+<script>
+  const sampleTexts = [
+    "The quick brown fox jumps over the lazy dog.",
+    "JavaScript is a versatile programming language.",
+    "Typing speed tests help improve accuracy and speed.",
+    "Web development combines HTML, CSS, and JavaScript.",
+    "Practice makes perfect when learning to type fast."
+  ];
+
+  let startTime, selectedText, interval;
+
+  function startTest() {
+    selectedText = sampleTexts[Math.floor(Math.random() * sampleTexts.length)];
+    document.getElementById("text-display").innerHTML = selectedText
+      .split("")
+      .map(char => `<span>${char}</span>`).join("");
+
+    document.getElementById("text-input").value = "";
+    document.getElementById("text-input").disabled = false;
+    document.getElementById("result").textContent = "";
+    document.getElementById("final-result").style.display = "none";
+    document.getElementById("text-input").focus();
+    startTime = new Date().getTime();
+
+    if (interval) clearInterval(interval);
+    interval = setInterval(updateSpeed, 1000);
+  }
+
+  document.getElementById("text-input").addEventListener("input", function () {
+    const typedText = this.value;
+    const textSpans = document.querySelectorAll("#text-display span");
+    let correctChars = 0;
+
+    textSpans.forEach((span, index) => {
+      const char = typedText[index];
+      if (char == null) {
+        span.style.color = "#fff";
+      } else if (char === span.textContent) {
+        span.style.color = "#00ff00"; // green
+        correctChars++;
+      } else {
+        span.style.color = "#ff4d4d"; // red
+      }
+    });
+
+    if (typedText.length >= selectedText.length) {
+      clearInterval(interval);
+      calculateFinalSpeed(correctChars);
+    }
+  });
+
+  function updateSpeed() {
+    const typedText = document.getElementById("text-input").value.trim();
+    const wordsArray = typedText.split(/\s+/);
+    const typedWords = wordsArray.length;
+
+    const elapsedTime = (new Date().getTime() - startTime) / 1000;
+    if (elapsedTime > 0) {
+      const speed = Math.round((typedWords / elapsedTime) * 60);
+      document.getElementById("result").textContent = `Typing Speed: ${speed} WPM`;
+    }
+  }
+
+  function calculateFinalSpeed(correctChars) {
+    clearInterval(interval);
+    const endTime = new Date().getTime();
+    const timeTaken = (endTime - startTime) / 1000;
+    const wordCount = selectedText.split(/\s+/).length;
+    const speed = Math.round((wordCount / timeTaken) * 60);
+    const accuracy = ((correctChars / selectedText.length) * 100).toFixed(2);
+
+    document.getElementById("result").textContent = "";
+    document.getElementById("final-result").style.display = "block";
+    document.getElementById("final-result").innerHTML =
+      `🎯 <b>Final Speed:</b> ${speed} WPM <br> 🎯 <b>Accuracy:</b> ${accuracy}%`;
+    document.getElementById("text-input").disabled = true;
+  }
+
+  function resetTest() {
+    clearInterval(interval);
+    document.getElementById("text-display").textContent = "Click \"Start Test\" to begin...";
+    document.getElementById("text-input").value = "";
+    document.getElementById("text-input").disabled = true;
+    document.getElementById("result").textContent = "";
+    document.getElementById("final-result").style.display = "none";
+  }
+</script>
+
+</body>
+</html>
