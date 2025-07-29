@@ -39,9 +39,6 @@ This project uses the following technologies:
 
 ---
 
-## 🖼 Screenshot
 
-Add a screenshot of your project by uploading the image and using the following markdown:
 
-```markdown
-![Screenshot](screenshot.png)
+
